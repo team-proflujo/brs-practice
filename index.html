@@ -1,0 +1,471 @@
+<html>
+    <head>
+        <title>Practice Bank Reconciliation</title>
+
+        <meta name="description" content="Practice Bank Reconciliation Statement is a web application designed to help users understand and practice the process of bank reconciliation. It provides an interactive platform for users to learn how to reconcile their bank statements with their cash book, identify discrepancies, and ensure accurate financial records.">
+
+        <meta name="keywords" content="Bank Reconciliation, Practice Bank Reconciliation, Bank Reconciliation Statement, Cash Book, Bank Pass Book, Financial Records, Discrepancies, Interactive Learning">
+
+        <meta name="author" content="Proflujo Technology Pvt. Ltd.">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="icon" type="image/svg+xml" href="/assets/images/logo.svg">
+
+        <style type="text/css">
+            @font-face {
+                font-family: 'AppFont';
+                src: url('/assets/fonts/ubuntu-regular.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+
+            html, body, #app {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                font-family: AppFont;
+                font-size: 1.1em;
+                user-select: none;
+            }
+
+            #mode-select {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+
+            #mode-select > #mode-select-options {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #mode-select button:not(:first-child) {
+                margin-left: 2rem;
+            }
+
+            #wb {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                min-height: 100%;
+                height: auto;
+            }
+
+            #app.start-wb #mode-select,
+            #app:not(.start-wb) #wb {
+                display: none;
+            }
+
+            svg {
+                width: 1em;
+                height: 1em;
+            }
+
+            select {
+                font-size: inherit;
+            }
+
+            .table-container {
+                width: 90%;
+                overflow-x: auto;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th, td {
+                border: 1px solid #ddd;
+                padding: 0.5em;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            tr:hover {
+                background-color: #ddd;
+            }
+
+            th {
+                padding-top: 0.75em;
+                padding-bottom: 0.75em;
+                text-align: left;
+                background-color: #007BFF;
+                color: white;
+            }
+
+            .brs-table > thead > tr > th:first-child ,
+            .brs-table > tbody > tr > th:first-child {
+                width: 40%;
+            }
+
+            .brs-table > thead > tr > th:last-child,
+            .brs-table > tbody > tr > th:last-child {
+                width: 10%;
+            }
+
+            .brs-table tr.result-correct,
+            .brs-table td:not(:last-child).result-correct {
+                background-color: #ccffcc;
+            }
+
+            .brs-table tr.result-wrong,
+            .brs-table td:not(:last-child).result-wrong {
+                background-color: #ffcccc;
+            }
+
+            .brs-table td:last-child.result-correct {
+                color: green;
+            }
+
+            .brs-table td:last-child.result-wrong {
+                color: red;
+            }
+
+            button {
+                padding: 0.5em 1em;
+                font-family: inherit;
+                font-size: 1em;
+                color: white;
+                background-color: #007BFF;
+                border: none;
+                border-radius: 0.25em;
+                cursor: pointer;
+            }
+
+            button:has(svg) {
+                display: flex;
+                align-items: center;
+            }
+
+            button.success {
+                background-color: #28a745;
+            }
+
+            button.btn-cancel {
+                background-color: #6c757d;
+            }
+
+            .btn-card {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .btn-card > span {
+                margin-top: 0.5em;
+            }
+
+            .btns-container {
+                margin-top: 2rem;
+                width: 100%;
+                display: flex;
+                justify-content: space-evenly;
+                align-items: center;
+            }
+
+            h3 {
+                text-align: center;
+            }
+
+            @media screen and (max-width: 580px) {
+                #mode-select > #mode-select-options {
+                    flex-direction: column;
+                }
+
+                #mode-select button:not(:first-child) {
+                    margin-left: 0;
+                    margin-top: 1rem;
+                }
+            }
+        </style>
+
+        <script type="text/javascript" src="/assets/js/jquery-4.0.0.min.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <div id="mode-select">
+                <h3>Practice Bank Reconciliation Statement</h3>
+
+                <div id="mode-select-options">
+                    <button id="mode-cashbook" class="btn-card">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M4 18V10C4 8.89543 4.89543 8 6 8H11.2H14.8H20C21.1046 8 22 8.89543 22 10V18C22 19.1046 21.1046 20 20 20H14.8H11.2H6C4.89543 20 4 19.1046 4 18Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18.5 14.01L18.51 13.9989" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.5 14.01L7.51 13.9989" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 16H3C1.89543 16 1 15.1046 1 14V6C1 4.89543 1.89543 4 3 4H17C18.1046 4 19 4.89543 19 6V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 16C11.8954 16 11 15.1046 11 14C11 12.8954 11.8954 12 13 12C14.1046 12 15 12.8954 15 14C15 15.1046 14.1046 16 13 16Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Start from Cashbook</span>
+                    </button>
+                    <button id="mode-bank-pass-book" class="success btn-card">
+                        <svg stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M3 9.5L12 4L21 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 20H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 9L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 17L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 17L10 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 17L14 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 17L18 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Start from Bank Passbook</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="wb">
+                <h3 id="wb-title">Start from <span class="wb-event-mode"></span></h3>
+
+                <div class="table-container">
+                    <table class="brs-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Initial Book</th>
+                                <th>Initial Impact in <span class="wb-event-mode"></span></th>
+                                <th>Reconciliation</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="btns-container">
+                    <button class="btn-cancel">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M11 6L5 12L11 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 6L13 12L19 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>&nbsp;Cancel
+                    </button>
+                    <!-- <button class="btn-submit">Submit</button> -->
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            (function() {
+                const initialBooks = Object.freeze({
+                    cashbook: 'Cashbook',
+                    bankPassBook: 'Bank Pass Book',
+                });
+
+                const impacts = Object.freeze({
+                    added: 'Added',
+                    subtracted: 'Subtracted',
+                    noAction: 'No action',
+                });
+
+                const reconciliations = Object.freeze({
+                    add: 'Add',
+                    subtract: 'Subtract',
+                });
+
+                const brsEvents = Object.freeze([
+                    {
+                        name: 'Cheque issued but not presented',
+                        initialBook: initialBooks.cashbook,
+                        cashbookEvent: {
+                            impact: impacts.subtracted,
+                            reconciliation: reconciliations.add,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.subtract,
+                        },
+                    },
+                    {
+                        name: 'Cheque deposited but not credited',
+                        initialBook: initialBooks.cashbook,
+                        cashbookEvent: {
+                            impact: impacts.added,
+                            reconciliation: reconciliations.subtract,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.add,
+                        },
+                    },
+                    {
+                        name: 'Bank charges/Service fees',
+                        initialBook: initialBooks.bankPassBook,
+                        cashbookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.subtract,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.subtracted,
+                            reconciliation: reconciliations.add,
+                        },
+                    },
+                    {
+                        name: 'Interest credited by bank',
+                        initialBook: initialBooks.bankPassBook,
+                        cashbookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.add,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.added,
+                            reconciliation: reconciliations.subtract,
+                        },
+                    },
+                    {
+                        name: 'Direct deposit by customer into bank',
+                        initialBook: initialBooks.bankPassBook,
+                        cashbookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.add,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.added,
+                            reconciliation: reconciliations.subtract,
+                        },
+                    },
+                    {
+                        name: 'Standing instruction (Loan EMP, Insurance, Rent)',
+                        initialBook: initialBooks.bankPassBook,
+                        cashbookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.subtract,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.subtracted,
+                            reconciliation: reconciliations.add,
+                        },
+                    },
+                    {
+                        name: 'Dishonour of cheque deposited',
+                        initialBook: initialBooks.cashbook,
+                        cashbookEvent: {
+                            impact: impacts.added,
+                            reconciliation: reconciliations.subtract,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.add,
+                        },
+                    },
+                    {
+                        name: 'Dishonour of cheque issued',
+                        initialBook: initialBooks.cashbook,
+                        cashbookEvent: {
+                            impact: impacts.subtracted,
+                            reconciliation: reconciliations.add,
+                        },
+                        bankPassBookEvent: {
+                            impact: impacts.noAction,
+                            reconciliation: reconciliations.subtract
+                        },
+                    },
+                ]);
+
+                let mode = null;
+
+                function createSelect(options) {
+                    let selectHTML = `<select><option value=""></option>`;
+                    for (const key in options) {
+                        selectHTML += `<option value="${options[key]}">${options[key]}</option>`;
+                    }
+                    selectHTML += `</select>`;
+                    return selectHTML;
+                }
+
+                function renderTable() {
+                    const tbody = $('#wb table tbody');
+                    tbody.empty();
+
+                    $('.wb-event-mode').text(initialBooks[mode]);
+
+                    const initialBookDD = createSelect(initialBooks),
+                        impactDD = createSelect(impacts),
+                        reconciliationDD = createSelect(reconciliations);
+
+                    for (const [index, event] of brsEvents.entries()) {
+                        const row = $(`
+                            <tr brs-event-id="${index}">
+                                <td>${event.name}</td>
+                                <td>${initialBookDD}</td>
+                                <td>${impactDD}</td>
+                                <td>${reconciliationDD}</td>
+                                <td></td>
+                            </tr>
+                        `);
+
+                        tbody.append(row);
+                    }
+                }
+
+                $(document).on('click', '#mode-cashbook', function() {
+                    $('#app').addClass('start-wb');
+                    mode = 'cashbook';
+
+                    renderTable();
+                });
+
+                $(document).on('click', '#mode-bank-pass-book', function() {
+                    $('#app').addClass('start-wb');
+                    mode = 'bankPassBook';
+
+                    renderTable();
+                });
+
+                $(document).on('click', '#wb .btn-cancel', function() {
+                    if ($('#wb table select').filter(function () { return $(this).val(); }).length > 0) {
+                        if (!confirm('Are you sure you want to cancel? Your progress will be lost.')) {
+                            return;
+                        }
+                    }
+
+                    $('#app').removeClass('start-wb');
+                    mode = null;
+
+                    $('.wb-event-mode').text('');
+                    $('#wb table tbody').empty();
+                });
+
+                $(document).on('change', '#wb select', function() {
+                    const tbody = $('#wb table tbody');
+
+                    tbody.find('tr').each(function() {
+                        const eventId = Number($(this).attr('brs-event-id')),
+                            initialBook = $(this).find('td:nth-child(2) select').val(),
+                            impact = $(this).find('td:nth-child(3) select').val(),
+                            reconciliation = $(this).find('td:nth-child(4) select').val();
+
+                        // console.log(`Event ID: ${eventId}, Initial Book: ${initialBook}, Cashbook Impact: ${impact}, Reconciliation: ${reconciliation}`);
+
+                        if (!(initialBook && impact && reconciliation)) {
+                            return;
+                        }
+
+                        const event = brsEvents[eventId];
+
+                        let isCorrect = true;
+
+                        if (event.initialBook == initialBook) {
+                            $(this).find('td:nth-child(2)').removeClass('result-wrong').addClass('result-correct');
+                        } else {
+                            $(this).find('td:nth-child(2)').removeClass('result-correct').addClass('result-wrong');
+                            isCorrect = false;
+                        }
+
+                        if (event[`${mode}Event`].impact == impact) {
+                            $(this).find('td:nth-child(3)').removeClass('result-wrong').addClass('result-correct');
+                        } else {
+                            $(this).find('td:nth-child(3)').removeClass('result-correct').addClass('result-wrong');
+                            isCorrect = false;
+                        }
+
+                        if (event[`${mode}Event`].reconciliation == reconciliation) {
+                            $(this).find('td:nth-child(4)').removeClass('result-wrong').addClass('result-correct');
+                        } else {
+                            $(this).find('td:nth-child(4)').removeClass('result-correct').addClass('result-wrong');
+                            isCorrect = false;
+                        }
+
+                        if (isCorrect) {
+                            $(this).find('td:last-child').text('Correct').removeClass('result-wrong').addClass('result-correct');
+                        } else {
+                            $(this).find('td:last-child').text('Wrong').removeClass('result-correct').addClass('result-wrong');
+                        }
+                    });
+                });
+            })();
+        </script>
+    </body>
+</html>

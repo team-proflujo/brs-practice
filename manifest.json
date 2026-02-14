@@ -1,0 +1,19 @@
+{
+    "name": "Practice Bank Reconciliation Statement",
+    "short_name": "Practice BRS",
+    "description": "Practice Bank Reconciliation Statement is a web application designed to help users understand and practice the process of bank reconciliation. It provides an interactive platform for users to learn how to reconcile their bank statements with their cash book, identify discrepancies, and ensure accurate financial records.",
+    "theme_color": "#007BFF",
+    "background_color": "#ddd",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/assets/images/logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
