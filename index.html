@@ -10,12 +10,12 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="icon" type="image/svg+xml" href="/assets/images/logo.svg">
+        <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
 
         <style type="text/css">
             @font-face {
                 font-family: 'AppFont';
-                src: url('/assets/fonts/ubuntu-regular.ttf') format('truetype');
+                src: url('assets/fonts/ubuntu-regular.ttf') format('truetype');
                 font-weight: normal;
                 font-style: normal;
             }
@@ -28,6 +28,10 @@
                 font-family: AppFont;
                 font-size: 1.1em;
                 user-select: none;
+            }
+
+            body {
+                position: relative;
             }
 
             #mode-select {
@@ -191,7 +195,7 @@
             }
         </style>
 
-        <script type="text/javascript" src="/assets/js/jquery-4.0.0.min.js"></script>
+        <script type="text/javascript" src="assets/js/jquery-4.0.0.min.js"></script>
     </head>
     <body>
         <div id="app">
@@ -257,6 +261,7 @@
 
                 const brsEvents = Object.freeze([
                     {
+                        id: 1,
                         name: 'Cheque issued but not presented',
                         initialBook: initialBooks.cashbook,
                         cashbookEvent: {
@@ -269,6 +274,7 @@
                         },
                     },
                     {
+                        id: 2,
                         name: 'Cheque deposited but not credited',
                         initialBook: initialBooks.cashbook,
                         cashbookEvent: {
@@ -281,6 +287,7 @@
                         },
                     },
                     {
+                        id: 3,
                         name: 'Bank charges/Service fees',
                         initialBook: initialBooks.bankPassBook,
                         cashbookEvent: {
@@ -293,6 +300,7 @@
                         },
                     },
                     {
+                        id: 4,
                         name: 'Interest credited by bank',
                         initialBook: initialBooks.bankPassBook,
                         cashbookEvent: {
@@ -305,6 +313,7 @@
                         },
                     },
                     {
+                        id: 5,
                         name: 'Direct deposit by customer into bank',
                         initialBook: initialBooks.bankPassBook,
                         cashbookEvent: {
@@ -317,7 +326,8 @@
                         },
                     },
                     {
-                        name: 'Standing instruction (Loan EMP, Insurance, Rent)',
+                        id: 6,
+                        name: 'Standing instruction (Loan EMI, Insurance, Rent)',
                         initialBook: initialBooks.bankPassBook,
                         cashbookEvent: {
                             impact: impacts.noAction,
@@ -329,6 +339,7 @@
                         },
                     },
                     {
+                        id: 7,
                         name: 'Dishonour of cheque deposited',
                         initialBook: initialBooks.cashbook,
                         cashbookEvent: {
@@ -341,6 +352,7 @@
                         },
                     },
                     {
+                        id: 8,
                         name: 'Dishonour of cheque issued',
                         initialBook: initialBooks.cashbook,
                         cashbookEvent: {
@@ -375,9 +387,9 @@
                         impactDD = createSelect(impacts),
                         reconciliationDD = createSelect(reconciliations);
 
-                    for (const [index, event] of brsEvents.entries()) {
+                    for (const [index, event] of shuffleEvents().entries()) {
                         const row = $(`
-                            <tr brs-event-id="${index}">
+                            <tr brs-event-id="${event.id}">
                                 <td>${event.name}</td>
                                 <td>${initialBookDD}</td>
                                 <td>${impactDD}</td>
@@ -388,6 +400,22 @@
 
                         tbody.append(row);
                     }
+                }
+
+                function isFormChanged() {
+                    return $('#wb table select').filter(function () { return $(this).val(); }).length > 0;
+                }
+
+                function shuffleEvents() {
+                    const shuffled = [...brsEvents];
+
+                    for (i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+
+                    return shuffled;
                 }
 
                 $(document).on('click', '#mode-cashbook', function() {
@@ -405,7 +433,7 @@
                 });
 
                 $(document).on('click', '#wb .btn-cancel', function() {
-                    if ($('#wb table select').filter(function () { return $(this).val(); }).length > 0) {
+                    if (isFormChanged()) {
                         if (!confirm('Are you sure you want to cancel? Your progress will be lost.')) {
                             return;
                         }
@@ -433,7 +461,7 @@
                             return;
                         }
 
-                        const event = brsEvents[eventId];
+                        const event = brsEvents.find(e => e.id === eventId);
 
                         let isCorrect = true;
 
@@ -464,6 +492,12 @@
                             $(this).find('td:last-child').text('Wrong').removeClass('result-correct').addClass('result-wrong');
                         }
                     });
+                });
+
+                $(window).on('beforeunload', function() {
+                    if (isFormChanged()) {
+                        return 'Are you sure you want to leave? Your progress will be lost.';
+                    }
                 });
             })();
         </script>
